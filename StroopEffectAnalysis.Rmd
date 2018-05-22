@@ -1,0 +1,280 @@
+---
+title: "Inferential Statistics Project"
+author: "Author : Animesh Chowdhury"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: united
+---
+
+**Dataset Overview: **
+In a Stroop task, participants are presented with a list of words, with each word displayed in a color of ink. The participant’s task is to say out loud the color of the ink in which the word is printed. The task has two conditions: a congruent words condition, and an incongruent words condition. In the congruent words condition, the words being displayed are color words whose names match the colors in which they are printed. In the incongruent words condition, the words displayed are color words whose names do not match the colors in which they are printed. In each case, the time it takes to name the ink colors in equally-sized lists were measured through an experiment. The dataset contains in each row the performance for one participant by word type.  
+
+**Variables: **
+ID : participant id
+Congruent: total time for a participant for congruent words condition 
+Incongruent: total time for a participant for incongruent words condition
+
+**Scope of Analysis: **
+Our initial assumption is on an average the time a participant takes to classify incongruent words condition should be more than the congruent words condition. We will also try to see what relationships exists among the variables of interest in our analysis.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message=FALSE,warning=FALSE)
+```
+
+```{r}
+# Getting the path for the directory
+getwd()
+```
+
+```{r}
+# Reading the csv file
+Stroop <- read.csv("stroopdata.csv")
+```
+
+Checking the first 6 rows of dataframe
+
+```{r}
+# Checking first n rows of data
+head(Stroop)
+```
+
+Summary statistics on the dataframe
+
+```{r}
+# Summary statistics on datafarme Stroop
+summary(Stroop)
+```
+
+```{r}
+# Reshaping the dataframe
+library(reshape)
+stroop_reshape <- melt(Stroop, id = c("ID"))
+colnames(stroop_reshape)[2] <- "WordType"
+colnames(stroop_reshape)[3] <- "TotalTime"
+```
+
+First 6 rows of reshaped data
+
+```{r}
+# Checking first n rows of data
+head(stroop_reshape)
+```
+
+The dependent variable in our analysis is 'TotalTime' and the independent variable is 'WordType'. As the time it takes to classify a word depends on the word type.
+
+Summary statistics on reshaped data
+
+```{r}
+# Summary statistics on datafarme stroop_reshape
+summary(stroop_reshape)
+```
+
+# Univariate Analysis
+
+Plotting the Congruent variable
+
+```{r}
+# Plotting histogram and density plot on Congruent attribute
+library(ggplot2)
+ggplot(Stroop, aes(x = Congruent)) +
+	geom_histogram(aes(y = ..density..), fill = "white", colour = "black")+
+	geom_density(colour = "black") 
+	
+```
+
+**Observation: ** 
+The above visualization is a combination of 2 univariate plots: histogram and density plot. The y axis is labeled as per density scale. As we can see from the above visualization the Congruent variable is not uniformly distributed & normally distributed. Infact we can observe that the visual is right skewed distribution. Hence, we will need to perform some transformation in order to make it a normal distributed visualization.
+
+Summary Statistics before log transformation
+```{r}
+# Summary statistics on Congruent attribute
+summary(Stroop$Congruent)
+```
+
+Plotting the Congruent variable after transformation
+```{r}
+# Plotting histogram and density plot on Congruent attribute after log transformation
+ggplot(Stroop, aes(x=log(Congruent))) +
+	geom_histogram(aes(y=..density..), fill="white", colour="black") +
+	geom_density(colour="black") 
+```
+
+**Observation: ** 
+From the above visualization we can infer that the distribution is still not normally distributed therefore we will need to perform some alternate transformation procedure in order to make it normally distributed.
+
+Summary statistics after log transformation
+```{r}
+# Summary statistics on Congruent attribute after log transformation
+summary(log(Stroop$Congruent))
+```
+
+**Observation: ** 
+From the above summary statictics table we can infer that the scale has reduced from 8.63-22.33 to
+2.155-3.106 after performing the log transformation.
+
+Plotting the Incongruent variable
+
+```{r}
+# Plotting histogram and density plot on Incongruent attribute
+ggplot(Stroop, aes(x = Incongruent)) +
+	geom_histogram(aes(y = ..density..), fill = "white", colour = "black")+
+	geom_density(colour = "black") 
+```
+
+**Observation: ** 
+The above visualization is a combination of 2 univariate plots: histogram and density plot. The y axis is labeled as per density scale. As we can see from the above visualization the Incongruent variable is not uniformly distributed & normally distributed. Infact we can observe that the visual is right skewed distribution. Hence, we will need to perform some transformation in order to make it a normal distributed visualization.
+
+Summary Statistics before log transformation
+```{r}
+# Summary statistics on Incongruent attribute
+summary(Stroop$Incongruent)
+```
+
+Plotting the Incongruent variable after transformation
+
+```{r}
+# Plotting histogram and density plot on Incongruent attribute after transformation
+ggplot(Stroop, aes(x = log(Incongruent))) +
+	geom_histogram(aes(y = ..density..), fill = "white", colour = "black")+
+	geom_density(colour = "black") 
+```
+
+**Observation: ** 
+From the above visualization we can infer that the distribution is still not normally distributed therefore we will need to perform some alternate transformation procedure in order to make it normally distributed.
+
+Summary Statistics after log transformation
+```{r}
+# Summary statistics on Incongruent attribute
+summary(log(Stroop$Incongruent))
+```
+
+**Observation: ** 
+From the above summary statictics table we can infer that the scale has reduced from 15.69-35.26 to
+2.75-3.56 after performing the log transformation.
+
+# Bivariate Analysis
+
+Comparing the incongruent vs congruent variable
+```{r}
+# Scatterplot visualization to compare incongruent and congruent attribute
+ggplot(aes(x = Congruent, y = Incongruent), data = Stroop)+
+  geom_point()+
+  geom_smooth(method = lm)
+```
+
+**Observation: ** 
+From the above visualization we can infer that there is a positive linear relationship between the congruent and incongruent attribute in our dataframe. We have used a regression line to best fit the linear model in our analysis.
+
+Finding the correlation coefficient between congruent & incongruent variable
+```{r}
+# Calculation of Correlation coefficient between congruent & incongruent attribute
+cor(Stroop$Congruent, Stroop$Incongruent)
+```
+**Observation: ** 
+We have a correlation coefficient value of 0.35 in our analysis which depicts a weak uphill (positive) linear relationship.
+
+Plotting the TotalTime based on WordType variable
+```{r}
+# Plotting TotalTime based on WordType after reshaping the dataframe
+ggplot(aes(x = TotalTime, color = WordType), data = stroop_reshape)+
+  geom_density()
+```
+
+**Observation: ** 
+The above visualization is a combination of 2 wordtypes: congruent and incongruent wordtypes (nominal data). The y axis is labeled as per density scale. We are comparing the distribution based on the wordtype in our dataframe. As we can see from the above visualization the Incongruent variable is less right skewed compared to congruent variable. 
+
+Boxplot distribution of WordType variable by TotalTime 
+```{r}
+# Boxplot distribution of WordType variable by TotalTime 
+boxplot_wordtype <- boxplot(stroop_reshape$TotalTime ~ stroop_reshape$WordType)
+print(boxplot_wordtype)
+```
+
+**Observation: ** 
+The above visualization helps us to figure out if we have any outliers in our distribution by wordtype. In our analysis we can observe that incongruent variable has 2 outliers which have total time more than 30
+however there are no outliers in case of congruent attribute.
+
+Measure of Variability:
+
+Range: 
+Congruent : 13.69 
+Incongruent: 10.6 
+
+IQR (Inter Quartile Range):
+Congruent : Q3-Q1 = 4.686
+Incongruent: Q3-Q1 = 5.5165
+
+Measure of Central Tendency:
+
+Mean:
+Congruent : 14.05 
+Incongruent: 22.02 
+
+Median:
+Congruent : 14.3565
+Incongruent: 21.0175
+
+
+Scatterplot distribution of WordType variable by TotalTime 
+```{r}
+# Scatterplot distribution of WordType variable by TotalTime 
+ggplot(aes(x = ID, y = TotalTime, color = WordType), data = stroop_reshape)+
+  geom_point()+
+  geom_smooth(method = lm)
+```
+
+**Observation: ** 
+We have used a regression line to fit the linear model by wordtype. From the above visualization we can infer that across the plot points by wordtype it takes more time to classify an incongruent variable compared to a congruent variable. This analysis aligns with our assumption. 
+
+# Hypothesis Testing
+For the hypothesis testing we will use the stroop dataframe. Since the sample size is 24 for both Congruent & Incongruent wordtypes and we have a sample size less than 30 for individual wordtypes hence we will use the 2 sample t test for our hypothesis testing.
+
+The hypothesis is as follows:
+u1 = mean time to classify congruent wordtype,
+u2 = mean time to classify incongruent wordtype
+
+Null Hypothesis (H0): u1 = u2 (Mean time to classify both the wordtype is said to be the same)
+Alternate Hypothesis (H1): u1 < u2 (Mean time to classify incongruent word type is greater than congruent wordtype)
+
+T-Test Results
+```{r}
+# Formulating t-test for the two samples
+t.test(Stroop$Congruent, Stroop$Incongruent)
+```
+
+**Observation: ** 
+We performed welch two sample t test wherein the confidence level was set to 95%.
+From the results we can infer that p values is less than 0.05 therefore we will reject null hypothesis and our alternate hypothesis is true which suggests that the mean time to classify incongruent word type is greater than congruent wordtype. Which confirms our initial assumption. 
+
+# Conclusion
+
+1. The dependent variable in our analysis is 'TotalTime' and the independent variable is 'WordType'. As the time it takes to classify a word depends on the word type.
+
+2. The appropriate set of hypothesis for this task are as follows:
+Null Hypothesis (H0): u1 = u2 (Mean time to classify both the wordtype is said to be the same)
+Alternate Hypothesis (H1): u1 < u2 (Mean time to classify incongruent word type is greater than congruent wordtype)
+We performed two sample t test and concluded our results based on p value which was 6.51e-08 which is less than 0.05 therefore our alternate hypothesis was true.
+
+3. Summary Statistics are as follow: 
+Measure of Central Tendency: 
+Mean (Congruent : 14.05 , Incongruent: 22.02)
+Median (Congruent : 14.3565, Incongruent: 21.0175)
+Measure of Variability:
+Range (Congruent : 13.69 , Incongruent: 10.6) 
+Inter Quartile Range (Congruent : 4.686, Incongruent : 5.5165)
+
+4. We were able to conclude through welch two sample t test that the mean time to classify incongruent word type is greater than congruent wordtype which confirmed our initial assumption. 
+
+# References
+
+http://t-redactyl.io/blog/2016/04/creating-plots-in-r-using-ggplot2-part-10-boxplots.html
+https://www.statmethods.net/management/reshape.html
+https://stackoverflow.com/questions/28173284/extract-statistics-from-boxplot
+http://geog.uoregon.edu/bartlein/courses/geog495/lec02.html
+http://statistics.berkeley.edu/computing/r-t-tests
+
+
+
